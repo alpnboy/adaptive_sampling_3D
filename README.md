@@ -5,9 +5,8 @@ This project provides a scalable pipeline for converting large 3D microscopy vol
 ## Key Features
 
 * **Tiling**: Large volumes are processed by chunks (`block_size`) using h5py "lazy loading".
-* **Multi-threading**: Tiles are processed in individual threads and resulting point cloud is merged in the main thread.
-* **Color Mapping**: Maps original voxel intensities from volume channels back onto the generated point cloud.
-* **Auto-Normalization**: Automatic estimation and removal of global background and percentile normalization before processing.
+* **Multi-threading**: Tiles are processed in individual threads and results are merged in the main one.
+* **Auto-Normalization**: Automatic background subtraction and percentile normalization before processing.
 * **Adaptive Density Sampling**: Sigmoid function determines tile density (n points to sample per tile) based on mesh surface area.
 * **Adaptive Information Sampling**: Informaiton-based sampling based on Sobel gradient, mesh surface, mesh curvature (to be tested), and intensity maps (to be implemented).
 
@@ -40,34 +39,11 @@ Merged Global Point Cloud
 ↓  
 PLY Export
 
-## Project structure
-
-adaptive_sampling/              # Root  
-├── data/                       
-│   ├── raw_h5/                 # Input: original .h5 image volume  
-│   └── results/                # Output: colored point cloud in .ply format  
-├── adaptive_sampling/            
-│   ├── __init__.py  
-│   ├── core/                   # Logic for Mesh, PointCloud, and Volume objects  
-│   │   ├── __init__.py  
-│   │   ├── mesh.py  
-│   │   ├── pointcloud.py  
-│   │   └── volume.py  
-│   ├── io/                     # Input (H5) and Output (PLY) operations  
-│   │   ├── __init__.py  
-│   │   ├── read.py  
-│   │   └── write.py  
-│   └── stages/                 # Processing stages  
-│       ├── __init__.py  
-│       ├── normalization.py  
-│       └── tile_processing.py  
-└── create_pcd_dataset.py       # Main entry point
-
 ## Usage guide
 
-The `create_pcd_dataset.py` file is the main entry point for the pipeline. It orchestrates the reading, pre-processing, processing, and writing of the output color point clouds from H5 volume images.
+The `create_pcd_dataset.py` file is the main entry point for the pipeline. It orchestrates the reading, processing, and writing of colored point clouds from H5 images.
 
-### Execution Example
+### Command Example
 
 python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
 
