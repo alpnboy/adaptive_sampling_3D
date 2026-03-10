@@ -91,7 +91,7 @@ Point clouds can appear flat without normals and rendering. For best visualizati
 
 ### Input HDF5 Structure
 
-At present, the pipeline expects each `.h5` file to contain **two datasets**, each representing a volumetric image channel.
+At present, the pipeline expects each `.h5` file to contain **two datasets** of shape (z, y, x), each representing a volumetric image channel.
 
 Example:
 
