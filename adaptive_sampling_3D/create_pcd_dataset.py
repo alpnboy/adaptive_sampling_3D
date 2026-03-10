@@ -14,7 +14,7 @@ def main():
     parser.add_argument('--result_dir', type = str, default = './data/results', help = 'directory where point clouds are saved')
     parser.add_argument('--multi_thread', type = bool, default = True, help = 'thread processing of volume tiles')
     parser.add_argument('--num_workers', type = int, default = 8, help = 'number of workers for multi threading (default = 8)')
-    parser.add_argument('--block_size', type = int, nargs = 3, default = [500, 500, 500], help = 'size of the volume tiles (Z, Y, X)')
+    parser.add_argument('--block_size', type = int, nargs = 3, default = [500, 500, 500], help = 'size of the volume tiles (z, y, x)')
     
     args = parser.parse_args()
     
