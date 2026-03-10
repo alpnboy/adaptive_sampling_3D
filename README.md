@@ -13,15 +13,18 @@ This project provides a scalable pipeline for converting large 3D microscopy vol
 ## Installation
 
 ### 1) Clone repository
-
+```bash
 git clone https://github.com/alpnboy/adaptive_sampling_3D.git  
 cd adaptive_sampling
+```
 
 ### 2) Create new environment and install requirements
 
+```bash
 conda create -n myenv python=3.10  
 conda activate myenv  
 pip install -r requirements.txt
+```
 
 ## Pipeline overview
 
@@ -44,9 +47,9 @@ PLY Export
 The `create_pcd_dataset.py` file is the main entry point for the pipeline. It orchestrates the reading, processing, and writing of colored point clouds from H5 images.
 
 ### Command Example
-
+```bash
 python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
-
+```
 ## Example Output
 
 The pipeline produces colored point clouds in `.ply` format. These can be visualized using:
@@ -71,6 +74,7 @@ Example:
 file.h5
 ├── channel_0
 ├── channel_1
+```
 
 ### Packages
 
