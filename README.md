@@ -55,6 +55,6 @@ The pipeline produces colored point clouds in `.ply` format. These can be visual
 - Open3D  
 - CloudCompare  
 
-Point cloud can appear flat without normals and rendering. For best visualization open the .ply file with CloudCompare, increase point size to 2-3, and enable "SSAO Shader" under "Display/Shaders & Filters".
+Point clouds can appear flat without normals and rendering. For best visualization open the .ply file with CloudCompare, increase point size to 2-3, and enable "SSAO Shader" under "Display/Shaders & Filters".
 
 ![Example output](images/example_1.png)
