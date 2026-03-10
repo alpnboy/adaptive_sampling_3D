@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ```
 
 ## Pipeline overview
-
+```text
 H5 Volume  
 ↓  
 Whole slide estimates (intensities cutoffs, percentiles, ...)  
@@ -41,6 +41,7 @@ Tile Colored Point Cloud
 Merged Global Point Cloud  
 ↓  
 PLY Export
+```
 
 ## Project structure
 
@@ -67,13 +68,13 @@ python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --resul
 ```
 
 ### Configuration / Parameters
-
+```text
 - `--input_dir`: directory with input H5 files
 - `--result_dir`: output directory for PLY files
 - `--block_size`: size of tile blocks in z, y, x
 - `--multi_thread`: True/False
 - `--num_workers`: number of threads
-
+```
 ## Example Output
 
 The pipeline produces colored point clouds in `.ply` format. These can be visualized using:
@@ -112,3 +113,14 @@ The project requires Python ≥ 3.10 and the following main libraries:
 - tqdm
 
 All dependencies are listed in `requirements.txt`.
+
+## Future developments
+
+### User:
+- Integrate information-based sampling using local intensities map and surface curvature.
+- Enable user specified cloud density and target channel/s.
+- Expand reader to OME-ZAR images.
+
+### Performance:
+- Optimize cpu operations (meshing, gradient estimation, ...).
+- C++ parallel processing implementation with Python bindings.
