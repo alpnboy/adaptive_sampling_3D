@@ -67,7 +67,7 @@ def volume_background_cutoff(hist, cutoff_range = (20, 200), step = 5, max_sampl
     Args:
         hist (np.ndarray): Intensities sampled from image volume.
         cutoff_range (tuple, optional): Lower and upper bound defining an interval to iteratively search the background cutoff. Defaults to (20, 200).
-        step (int, optional): _description_. Defaults to 5.
+        step (int, optional): Jump between intensities during iterative refinement. Defaults to 5.
         max_samples (int, optional): Max number of background samples allowed to be fitted to normal distribution. Defaults to 5000.
         min_pixels (int, optional): Minimum number of voxels within estimated background. Defaults to 200.
         random_state (int, optional): Seed for np.random. Defaults to 2.
