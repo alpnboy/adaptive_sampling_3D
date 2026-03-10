@@ -10,18 +10,18 @@ from adaptive_sampling_3D.core import mesh
 from adaptive_sampling_3D.core import pointcloud as pcd
 
 def process_tile(img_path, index, shape, percentiles, backgrounds, channels):
-    """ Orchestrates processing of individual volume tiles into colored point cloud tiles.
+    """ Orchestrates processing of individual tile volumes into colored point cloud tiles.
 
     Args:
-        img_path (_type_): _description_
-        index (list): _description_
-        shape (_type_): _description_
-        percentiles (float): _description_
-        backgrounds (float): _description_
+        img_path (str): Path to the HDF5 file containing the image volume.
+        index (list): Origin coordinates (z, y, x) of the tile to be processed.
+        shape (list): Shape (z, y, x) of the tile to be processed.
+        percentiles (list of tuples): List of (low_p, high_p) cutoffs for percentile normalization per channel.
+        backgrounds (list of float): Cutoff values for background subtraction per channel.
         channels (list): list of tuples containing per channel point cloud and positional index
 
     Returns:
-        _type_: _description_
+        list: A per channel list of (tile colored point cloud, index).
     """
     
     # Float conversion to avoid uint16 integer underflow
@@ -52,6 +52,18 @@ def process_tile(img_path, index, shape, percentiles, backgrounds, channels):
     return results
 
 def process_tiles_sequential(img_path, percentiles, backgrounds, channels, block_size = (500, 500, 500)):
+    """Processes all tiles of a volume sequentially and merges intermediate results into a global colored point cloud.
+
+    Args:
+        img_path (str): Path to the HDF5 file containing the image volume.
+        percentiles (list of tuples): List of (low_p, high_p) cutoffs for percentile normalization per channel.
+        backgrounds (list of float): Cutoff values for background subtraction per channel.
+        channels (list): List of tuples containing per-channel point cloud and positional index.
+        block_size (tuple, optional): Size of tiles (z, y, x) to process. Defaults to (500, 500, 500).
+
+    Returns:
+        o3d.geometry.PointCloud: Merged colored point cloud from all tiles.
+    """
     
     tile_n = 0
     merged_pcd = o3d.geometry.PointCloud()
@@ -81,6 +93,19 @@ def process_tiles_sequential(img_path, percentiles, backgrounds, channels, block
 
 
 def process_tiles_multi_threaded(img_path, percentiles, backgrounds, channels, block_size = [500, 500, 500], max_workers = 8):
+    """Processes all tiles of a volume in parallel using multiple threads and merges intermediate results into a global colored point cloud.
+
+    Args:
+        img_path (str): Path to the HDF5 file containing the image volume.
+        percentiles (list of tuples): List of (low_p, high_p) cutoffs for percentile normalization per channel.
+        backgrounds (list of float): Cutoff values for background subtraction per channel.
+        channels (list): List of tuples containing per-channel point cloud and positional index.
+        block_size (list, optional): Size of tiles (z, y, x) to process. Defaults to [500, 500, 500].
+        max_workers (int, optional): Maximum number of threads to use. Defaults to 8.
+
+    Returns:
+        o3d.geometry.PointCloud: Merged colored point cloud from all tiles.
+    """
     
     # Pre-compute all tile indices for workers
     all_tiles = list(read.get_indices(img_path, block_size))
