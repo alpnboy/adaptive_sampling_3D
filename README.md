@@ -53,8 +53,33 @@ The pipeline produces colored point clouds in `.ply` format. These can be visual
 
 - MeshLab  
 - Open3D  
-- CloudCompare  
+- CloudCompare
 
 Point clouds can appear flat without normals and rendering. For best visualization open the .ply file with CloudCompare, increase point size to 2-3, and enable "SSAO Shader" under "Display/Shaders & Filters".
 
 ![Example output](images/example_1.png)
+
+## Requirements
+
+### Input HDF5 Structure
+
+At present the pipeline expects each `.h5` file to contain **two datasets**, each representing a volumetric image channel.
+
+Example:
+
+file.h5
+├── channel_0
+├── channel_1
+
+### Packages
+
+The project requires Python ≥ 3.10 and the following main libraries:
+
+- numpy
+- h5py
+- open3d
+- scikit-image
+- scipy
+- tqdm
+
+All dependencies are listed in `requirements.txt`.
