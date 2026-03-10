@@ -42,6 +42,21 @@ Merged Global Point Cloud
 ↓  
 PLY Export
 
+## Project structure
+
+```text
+adaptive_sampling/              # Root
+├── data/                       
+│   ├── raw_h5/                 # Input H5 volumes
+│   └── results/                # Output colored point clouds
+├── adaptive_sampling/          
+│   ├── core/                   # Mesh, PointCloud, Volume logic
+│   ├── io/                     # Input/Output operations
+│   └── stages/                 # Processing stages
+└── create_pcd_dataset.py       # Main entry point
+```
+
+
 ## Usage guide
 
 The `create_pcd_dataset.py` file is the main entry point for the pipeline. It orchestrates the reading, processing, and writing of colored point clouds from H5 images.
@@ -50,6 +65,15 @@ The `create_pcd_dataset.py` file is the main entry point for the pipeline. It or
 ```bash
 python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
 ```
+
+### Configuration / Parameters
+
+- `--input_dir`: directory with input H5 files
+- `--result_dir`: output directory for PLY files
+- `--block_size`: size of tile blocks in z, y, x
+- `--multi_thread`: True/False
+- `--num_workers`: number of threads
+
 ## Example Output
 
 The pipeline produces colored point clouds in `.ply` format. These can be visualized using:
