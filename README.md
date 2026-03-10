@@ -1,6 +1,6 @@
 # Adaptive sampling for 3D biopsies
 
-This project provides a scalable pipeline for converting large 3D microscopy volumes stored in HDF5 into light-weight colored point clouds using tile-based processing and adaptive sampling. The system is designed for datasets that exceed RAM capacity and supports parallel processing, automatic normalization, and adaptive density/information sampling.
+This project provides a scalable pipeline for converting large 3D microscopy volumes stored in HDF5 into light-weight colored point clouds using tile-based processing and adaptive sampling. The system is designed for datasets that exceed RAM capacity and supports parallel processing, automatic normalization, and adaptive density/information sampling. The final colored point cloud is meant to be a highly compressed representation compatible with existing end-to-end algorithms for geometric deep learning.
 
 ## Key Features
 
