@@ -46,11 +46,11 @@ PLY Export
 ## Project structure
 
 ```text
-adaptive_sampling/              # Root
+adaptive_sampling_3D/              # Root
 ├── data/                       
 │   ├── raw_h5/                 # Input H5 volumes
 │   └── results/                # Output colored point clouds
-├── adaptive_sampling/          
+├── adaptive_sampling_3D/          
 │   ├── core/                   # Mesh, PointCloud, Volume logic
 │   ├── io/                     # Input/Output operations
 │   └── stages/                 # Processing stages
