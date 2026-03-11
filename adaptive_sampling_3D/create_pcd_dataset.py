@@ -66,7 +66,7 @@ def main():
             merged_pcd = tiling.process_tiles_sequential(img_path, percentiles, backgrounds, channels, block_size = block_size)
             
         # Save global point cloud
-        logger.info("Saving point cloud to: {result_path}")
+        logger.info(f"Saving point cloud to: {result_path}")
         pointCloudWriter.save_pcd(merged_pcd, result_path)
                     
 if __name__ == "__main__":
