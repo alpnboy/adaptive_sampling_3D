@@ -1,8 +1,8 @@
 import os
 import argparse
 
-from adaptive_sampling_3D.io import read
-from adaptive_sampling_3D.io import write as wrt
+from adaptive_sampling_3D.io import imageReader
+from adaptive_sampling_3D.io import pointCloudWriter
 from adaptive_sampling_3D.stages import normalization as norm
 from adaptive_sampling_3D.stages import tile_processing as tiling
 
@@ -38,7 +38,7 @@ def main():
         result_path = os.path.join(result_dir, f"{base_name}.ply")
         
         # Compute normalization parameters from whole slide image
-        channels = read.get_channels(img_path)
+        channels = imageReader.get_channels(img_path)
         percentiles, backgrounds = norm.compute_slide_normalization(img_path, channels)
         
         if multi_thread == True:
@@ -49,7 +49,7 @@ def main():
             merged_pcd = tiling.process_tiles_sequential(img_path, percentiles, backgrounds, channels, block_size = block_size)
             
         # Save global point cloud
-        wrt.save_pcd(merged_pcd, result_path)
+        pointCloudWriter.save_pcd(merged_pcd, result_path)
                     
 if __name__ == "__main__":
     main()

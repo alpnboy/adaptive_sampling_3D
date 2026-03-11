@@ -21,8 +21,16 @@ cd adaptive_sampling
 ### 2) Create new environment and install requirements
 
 ```bash
-conda create -n myenv python=3.10  
-conda activate myenv  
+conda create -n 3DxNenv python=3.10  
+conda activate 3DxNenv  
+pip install -r requirements.txt
+```
+
+Python venvs can be used instead of conda if the host system has a suitable Python version (>=3.10).
+```bash
+# On Linux/OSX:
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
