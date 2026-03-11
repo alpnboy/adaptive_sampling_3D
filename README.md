@@ -72,7 +72,7 @@ The `create_pcd_dataset.py` file is the main entry point for the pipeline. It or
 
 ### Command Example
 ```bash
-python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
+python -m adaptive_sampling_3D.create_pcd_dataset --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
 ```
 
 ### Configuration / Parameters
