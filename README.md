@@ -21,8 +21,16 @@ cd adaptive_sampling
 ### 2) Create new environment and install requirements
 
 ```bash
-conda create -n myenv python=3.10  
-conda activate myenv  
+conda create -n 3DxNenv python=3.10  
+conda activate 3DxNenv  
+pip install -r requirements.txt
+```
+
+Python venvs can be used instead of conda if the host system has a suitable Python version (>=3.10).
+```bash
+# On Linux/OSX:
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -64,7 +72,7 @@ The `create_pcd_dataset.py` file is the main entry point for the pipeline. It or
 
 ### Command Example
 ```bash
-python adaptive_sampling.create_pcd_dataset.py --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
+python -m adaptive_sampling_3D.create_pcd_dataset --input_dir ./data/raw_h5 --result_dir ./data/results --multi_thread True --num_workers 8 --block_size 500 500 500
 ```
 
 ### Configuration / Parameters

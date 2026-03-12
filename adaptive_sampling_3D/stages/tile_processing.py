@@ -4,7 +4,7 @@ import open3d as o3d
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from adaptive_sampling_3D.io import read
+from adaptive_sampling_3D.io import imageReader
 from adaptive_sampling_3D.core import volume as vlm
 from adaptive_sampling_3D.core import mesh 
 from adaptive_sampling_3D.core import pointcloud as pcd
@@ -25,7 +25,7 @@ def process_tile(img_path, index, shape, percentiles, backgrounds, channels):
     """
     
     # Float conversion to avoid uint16 integer underflow
-    tile_volume = read.get_tile(img_path, index, shape).astype(np.float32)
+    tile_volume = imageReader.get_tile(img_path, index, shape).astype(np.float32)
         
     # Background subtraction and normalization based on estimate from whole volume
     for ch in range(0,len(channels)):
@@ -68,7 +68,7 @@ def process_tiles_sequential(img_path, percentiles, backgrounds, channels, block
     tile_n = 0
     merged_pcd = o3d.geometry.PointCloud()
     
-    for iter in read.iter_tiles(img_path, block_size):
+    for iter in imageReader.iter_tiles(img_path, block_size):
         tile_n += 1
         print("tile number", tile_n)
         tile_volume = iter.get("cuboid").astype(np.float32)
@@ -108,7 +108,7 @@ def process_tiles_multi_threaded(img_path, percentiles, backgrounds, channels, b
     """
     
     # Pre-compute all tile indices for workers
-    all_tiles = list(read.get_indices(img_path, block_size))
+    all_tiles = list(imageReader.get_indices(img_path, block_size))
     total_indices = len(all_tiles)
     
     # List for processed pointcloud
