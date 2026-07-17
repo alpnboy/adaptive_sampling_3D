@@ -1,6 +1,7 @@
 import numpy as np
 
 from adaptive_sampling_3D.core import volume as vlm
+from adaptive_sampling_3D.io import imageReader
 
 
 def compute_slide_normalization(img_path, channels):
@@ -18,7 +19,7 @@ def compute_slide_normalization(img_path, channels):
     
     # Estimate intensity histograms over image volume
     for channel in channels:
-        hist = vlm.sample_volume_histograms(img_path, channel) 
+        hist = imageReader.sample_volume_histograms(img_path, channel)
         histograms.append(hist) 
             
     hist_ch1 = histograms[0].astype(np.float32)

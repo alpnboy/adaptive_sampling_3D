@@ -21,6 +21,25 @@ handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"
 if not logger.handlers:
     logger.addHandler(handler)
 
+def _strip_image_suffix(file_name):
+    """Return the base name of an image, dropping known image suffixes.
+
+    Handles ``.h5`` files as well as ``.zarr`` / ``.ome.zarr`` groups, e.g.
+    ``sample.ome.zarr`` -> ``sample`` and ``sample.h5`` -> ``sample``.
+    """
+
+    base = file_name.rstrip('/')
+    lowered = base.lower()
+
+    if lowered.endswith('.zarr'):
+        base = base[:-len('.zarr')]
+        if base.lower().endswith('.ome'):
+            base = base[:-len('.ome')]
+        return base
+
+    return os.path.splitext(base)[0]
+
+
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description = 'Generate a dataset of colored pointclouds by adaptive sampling large 3D images')
@@ -40,19 +59,22 @@ def main():
     
     # Check result folder exists
     os.makedirs(result_dir, exist_ok=True)
-    
-    # Only grabs h5 files
-    file_names = [f for f in os.listdir(input_dir) if f.endswith('.h5')]
-    
+
+    # Grabs HDF5 files and OME-Zarr groups (directories ending in .zarr, .ome.zarr included)
+    file_names = [
+        f for f in os.listdir(input_dir)
+        if f.endswith('.h5') or f.rstrip('/').lower().endswith('.zarr')
+    ]
+
     logger.info(f"Processing files: {file_names}")
 
     for file_name in file_names:
         logger.info(f"Processing file: {file_name}")
-        # Path of target h5 image and resulting pcd
+        # Path of target image and base name for the result
         img_path = os.path.join(input_dir, file_name)
-        base_name = os.path.splitext(file_name)[0]
-        result_path = os.path.join(result_dir, f"{base_name}.ply")
-        
+        is_ome_zarr = imageReader.is_ome_zarr(img_path)
+        base_name = _strip_image_suffix(file_name)
+
         # Compute normalization parameters from whole slide image
         channels = imageReader.get_channels(img_path)
         logger.info(f"Channels found: {channels}")
@@ -64,10 +86,17 @@ def main():
         else:
             # Sequential processing of volume tiles to pcd
             merged_pcd = tiling.process_tiles_sequential(img_path, percentiles, backgrounds, channels, block_size = block_size)
-            
-        # Save global point cloud
-        logger.info(f"Saving point cloud to: {result_path}")
-        pointCloudWriter.save_pcd(merged_pcd, result_path)
+
+        # Save global point cloud, matching the output format to the input format
+        if is_ome_zarr:
+            # Write into an OME-Zarr structure under points/adaptive_sampling_3D
+            zarr_root = os.path.join(result_dir, f"{base_name}.ome.zarr")
+            logger.info(f"Saving point cloud to OME-Zarr: {zarr_root}/{pointCloudWriter.POINTS_GROUP}/{pointCloudWriter.POINTS_NAME}")
+            pointCloudWriter.save_pcd_ome_zarr(merged_pcd, zarr_root)
+        else:
+            result_path = os.path.join(result_dir, f"{base_name}.ply")
+            logger.info(f"Saving point cloud to: {result_path}")
+            pointCloudWriter.save_pcd(merged_pcd, result_path)
                     
 if __name__ == "__main__":
     main()

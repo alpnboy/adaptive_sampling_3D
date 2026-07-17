@@ -1,6 +1,5 @@
 import numpy as np
 import open3d as o3d
-import h5py as h5
 
 from scipy.stats import shapiro, skew
 from skimage import measure
@@ -27,36 +26,6 @@ def compute_sobel_gradient(volume):
     gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2 + grad_z**2) 
     
     return gradient_magnitude
-
-
-def sample_volume_histograms(img_path, channel, n_samples = 10000):
-    """ Estimate the intensitiy distribution of a 3D image volume by sampling.
-
-    Args:
-        img_path (str): Path to the HDF5 file containing the image volume.
-        channel (int): Index of the channel to sample.
-        n_samples (int, optional): Number of random voxels to sample for the distribution estimate. Defaults to 10000.
-
-    Returns:
-        np.ndarray: A 1D array of length `n_samples` containing the sampled intensity values.
-    """
-            
-    # Open volume HD5F image        
-    with h5.File(img_path, "r") as f:
-            
-        # Get dataset shape to know volume voxel boundaries    
-        dataset = f[channel]        
-        vol_size = dataset.shape
-            
-        # Random sample n x (z, y, x) coordinates within volume boundaries
-        random_coordinates = np.random.randint([0, 0, 0], vol_size, size = (n_samples, 3))
-        sampled_values = np.empty(n_samples, dtype=dataset.dtype)
-        
-        # Lazy load chunk coordinates from HD5F image    
-        for i, (z, y, x) in enumerate(random_coordinates):
-            sampled_values[i] = dataset[z, y, x]
-                
-        return sampled_values
 
 
 def volume_background_cutoff(hist, cutoff_range = (20, 200), step = 5, max_samples = 5000, min_voxels = 200, random_state = 2):

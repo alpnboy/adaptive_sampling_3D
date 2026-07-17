@@ -77,8 +77,8 @@ python -m adaptive_sampling_3D.create_pcd_dataset --input_dir ./data/raw_h5 --re
 
 ### Configuration / Parameters
 ```text
-- `--input_dir`: directory with input H5 files
-- `--result_dir`: output directory for PLY files
+- `--input_dir`: directory with input volumes (HDF5 `.h5` or OME-Zarr `.zarr`)
+- `--result_dir`: output directory for results (PLY for HDF5 input, OME-Zarr points group for OME-Zarr input)
 - `--block_size`: size of tile blocks in z, y, x
 - `--multi_thread`: True/False
 - `--num_workers`: number of threads
@@ -97,17 +97,24 @@ Point clouds can appear flat without normals and rendering. For best visualizati
 
 ## Requirements
 
-### Input HDF5 Structure
+### Input structure
 
-At present, the pipeline expects each `.h5` file to contain **two datasets** of shape (z, y, x), each representing a volumetric image channel.
+The pipeline reads two input formats, auto-detected from each entry in `--input_dir`:
 
-Example:
+**HDF5** (`.h5`) — each file must contain **two datasets** of shape (z, y, x), each a volumetric image channel:
 
 ```text
 file.h5
 ├── channel_0
 ├── channel_1
 ```
+
+**OME-Zarr v0.5** (`.zarr` / `.ome.zarr`) — a Zarr v3 group read via `ome-zarr-py`. Channels live on the `c` axis of the multiscale array (axes such as `czyx` or `tczyx`); the pipeline uses the highest-resolution level and its first two channels.
+
+### Output structure
+
+- HDF5 input → a colored point cloud in `.ply` format in `--result_dir`.
+- OME-Zarr input → the point cloud is written into an OME-Zarr structure at `<result_dir>/<name>.ome.zarr/points/adaptive_sampling_3D`, as a Zarr v3 sub-group holding `coordinates` (N×3, z/y/x) and `colors` (N×3, RGB) arrays.
 
 ### Packages
 
@@ -119,6 +126,8 @@ The project requires Python ≥ 3.10 and the following main libraries:
 - scikit-image
 - scipy
 - tqdm
+- ome-zarr
+- zarr
 
 All dependencies are listed in `requirements.txt`.
 
