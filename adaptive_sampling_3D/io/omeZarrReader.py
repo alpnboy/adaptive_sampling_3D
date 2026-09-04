@@ -10,9 +10,24 @@ axis order is described by the ``multiscales`` metadata (typically ``czyx`` or
 ``tczyx``). This module resolves that axis mapping and exposes per-channel
 ``(Z, Y, X)`` volumes stacked on the last axis, matching the ``(Z, Y, X, C)``
 layout produced by the HDF5 reader.
+
+Both common on-disk layouts are accepted. An image group may be addressed
+directly, or the path may point at a ``bioformats2raw`` container whose root
+holds no pixel data and nests its images in numbered subgroups::
+
+    sample.ome.zarr/          <- root, "bioformats2raw.layout": 3
+    ├── OME/
+    │   ├── zarr.json         <- "series": ["0"]
+    │   └── METADATA.ome.xml
+    └── 0/                    <- the multiscale image this module reads
+
+``ome_zarr.reader.Reader`` does not descend into those series groups, so the
+container is resolved to its image group before reading.
 """
 
 import logging
+
+from functools import lru_cache
 
 import numpy as np
 
@@ -26,12 +41,93 @@ logging.getLogger("ome_zarr").setLevel(logging.WARNING)
 
 SUPPORTED_VERSION = "0.5"
 
+# Value of the "bioformats2raw.layout" attribute marking a multi-series container
+BIOFORMATS2RAW_LAYOUT = 3
+
+
+def _series_paths(location):
+    """List the image group paths held by a bioformats2raw container.
+
+    Prefers the explicit ``series`` list recorded on the ``OME`` group. The NGFF
+    spec allows that attribute to be absent, in which case images "MUST be stored
+    in consecutively numbered groups starting from 0", so the numbered groups are
+    probed instead. Both routes go through the Zarr store rather than the local
+    filesystem, so remote containers resolve the same way as local ones.
+
+    Args:
+        location (ome_zarr.io.ZarrLocation): Location of the container root.
+
+    Returns:
+        list[str]: Group paths relative to the container root, in series order.
+    """
+
+    ome_group = location.create("OME")
+
+    if ome_group.exists():
+        series = ome_group.root_attrs.get("series")
+        if series:
+            return [str(path) for path in series]
+
+    # No series attribute: fall back to the consecutively numbered groups
+    paths = []
+    index = 0
+
+    while location.create(str(index)).exists():
+        paths.append(str(index))
+        index += 1
+
+    return paths
+
+
+@lru_cache(maxsize=None)
+def _image_path(img_path):
+    """Resolve an input path to the path of the multiscale image to read.
+
+    Paths that already address an image group are returned unchanged, so the
+    flat layout keeps working. Results are cached because tiles re-open the
+    image on every read and the resolution only touches metadata.
+
+    Args:
+        img_path (str): Path (or URL) given to the reader.
+
+    Returns:
+        str: Path of the group that carries the ``multiscales`` metadata.
+    """
+
+    location = parse_url(img_path, mode="r")
+    if location is None:
+        raise ValueError(f"'{img_path}' is not a readable OME-Zarr group")
+
+    if location.root_attrs.get("bioformats2raw.layout") != BIOFORMATS2RAW_LAYOUT:
+        return img_path
+
+    series = _series_paths(location)
+
+    if not series:
+        raise ValueError(
+            f"'{img_path}' is a bioformats2raw container but holds no image series"
+        )
+
+    # The pipeline processes one image per input path, so extra series are skipped
+    if len(series) > 1:
+        logger.warning(
+            "bioformats2raw container '%s' holds %d series %s, reading the first one; "
+            "pass the image group directly to select another",
+            img_path, len(series), series,
+        )
+
+    resolved = location.subpath(series[0])
+    logger.info("Resolved bioformats2raw container '%s' to image group '%s'", img_path, resolved)
+
+    return resolved
+
 
 def _open_image(img_path):
     """Open an OME-Zarr image and return its highest resolution array and axes.
 
     Args:
-        img_path (str): Path (or URL) to the OME-Zarr group.
+        img_path (str): Path (or URL) to an OME-Zarr image group, or to a
+            bioformats2raw container holding one.
 
     Returns:
         tuple: ``(data, axes)`` where ``data`` is a dask array of the full
@@ -39,9 +135,12 @@ def _open_image(img_path):
             (e.g. ``['c', 'z', 'y', 'x']``).
     """
 
-    location = parse_url(img_path, mode="r")
+    # Accepts an image group directly, or a bioformats2raw container wrapping one
+    image_path = _image_path(img_path)
+
+    location = parse_url(image_path, mode="r")
     if location is None:
-        raise ValueError(f"'{img_path}' is not a readable OME-Zarr group")
+        raise ValueError(f"'{image_path}' is not a readable OME-Zarr group")
 
     # Warn (but do not fail) when the on-disk version is not the targeted v0.5
     version = location.root_attrs.get("version") or getattr(location.fmt, "version", None)
@@ -53,7 +152,7 @@ def _open_image(img_path):
 
     node = next(iter(Reader(location)()), None)
     if node is None or not node.data:
-        raise ValueError(f"No multiscale image data found in '{img_path}'")
+        raise ValueError(f"No multiscale image data found in '{image_path}'")
 
     axes = [axis["name"] for axis in node.metadata["axes"]]
 

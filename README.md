@@ -111,6 +111,19 @@ file.h5
 
 **OME-Zarr v0.5** (`.zarr` / `.ome.zarr`) — a Zarr v3 group read via `ome-zarr-py`. Channels live on the `c` axis of the multiscale array (axes such as `czyx` or `tczyx`); the pipeline uses the highest-resolution level and its first two channels.
 
+Either on-disk layout is accepted. `--input_dir` may hold multiscale image groups directly, or `bioformats2raw` containers whose root carries `"bioformats2raw.layout": 3` and nests the image in a numbered subgroup:
+
+```text
+sample.ome.zarr/
+├── zarr.json           # "bioformats2raw.layout": 3
+├── OME/
+│   ├── zarr.json       # "series": ["0"]
+│   └── METADATA.ome.xml
+└── 0/                  # the multiscale image
+```
+
+Containers are resolved to their image group automatically, preferring the `series` attribute and otherwise probing the consecutively numbered groups the spec mandates. A container holding several series reads the first and logs a warning; pass the image group path directly to select another.
+
 ### Output structure
 
 - HDF5 input → a colored point cloud in `.ply` format in `--result_dir`.
