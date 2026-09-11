@@ -1,0 +1,85 @@
+{
+  "attributes": {
+    "ome": {
+      "version": "0.5",
+      "multiscales": [
+        {
+          "name": "synthetic",
+          "axes": [
+            {
+              "name": "t",
+              "type": "time",
+              "unit": "second"
+            },
+            {
+              "name": "c",
+              "type": "channel"
+            },
+            {
+              "name": "z",
+              "type": "space",
+              "unit": "micrometer"
+            },
+            {
+              "name": "y",
+              "type": "space",
+              "unit": "micrometer"
+            },
+            {
+              "name": "x",
+              "type": "space",
+              "unit": "micrometer"
+            }
+          ],
+          "datasets": [
+            {
+              "path": "0",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "scale": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "omero": {
+        "name": "synthetic",
+        "version": "0.5",
+        "channels": [
+          {
+            "label": "channel_0",
+            "color": "FF00FF",
+            "active": true,
+            "window": {
+              "min": 0.0,
+              "max": 65535.0,
+              "start": 0.0,
+              "end": 983.0
+            }
+          },
+          {
+            "label": "channel_1",
+            "color": "00FF00",
+            "active": true,
+            "window": {
+              "min": 0.0,
+              "max": 65535.0,
+              "start": 2.0,
+              "end": 3833.0
+            }
+          }
+        ]
+      }
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}

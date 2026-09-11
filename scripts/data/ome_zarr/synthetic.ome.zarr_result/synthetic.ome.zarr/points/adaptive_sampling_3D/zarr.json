@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "ome": {
+      "version": "0.5"
+    },
+    "points": {
+      "version": "0.1",
+      "count": 3843,
+      "axes": [
+        "z",
+        "y",
+        "x"
+      ],
+      "attributes": [
+        "coordinates",
+        "colors"
+      ]
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}

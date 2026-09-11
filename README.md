@@ -78,7 +78,8 @@ python -m adaptive_sampling_3D.create_pcd_dataset --input_dir ./data/raw_h5 --re
 ### Configuration / Parameters
 ```text
 - `--input_dir`: directory with input volumes (HDF5 `.h5` or OME-Zarr `.zarr`)
-- `--result_dir`: output directory for results (PLY for HDF5 input, OME-Zarr points group for OME-Zarr input)
+- `--result_dir`: output directory for results
+- `--output_format`: `auto` (default, matches the input), `ply`, `zarr`, or `both`
 - `--block_size`: size of tile blocks in z, y, x
 - `--multi_thread`: True/False
 - `--num_workers`: number of threads
@@ -126,8 +127,19 @@ Containers are resolved to their image group automatically, preferring the `seri
 
 ### Output structure
 
-- HDF5 input → a colored point cloud in `.ply` format in `--result_dir`.
-- OME-Zarr input → the point cloud is written into an OME-Zarr structure at `<result_dir>/<name>.ome.zarr/points/adaptive_sampling_3D`, as a Zarr v3 sub-group holding `coordinates` (N×3, z/y/x) and `colors` (N×3, RGB) arrays.
+The point cloud carries no trace of the container it was read from, so `--output_format` selects the output independently of the input:
+
+| `--output_format` | Result |
+|---|---|
+| `auto` *(default)* | Follows the input: PLY for HDF5, OME-Zarr for OME-Zarr |
+| `ply` | `<result_dir>/<name>.ply` for any input |
+| `zarr` | `<result_dir>/<name>.ome.zarr` for any input |
+| `both` | Writes both of the above |
+
+- PLY output → a colored point cloud in `.ply` format in `--result_dir`.
+- OME-Zarr output → the point cloud is written into an OME-Zarr structure at `<result_dir>/<name>.ome.zarr/points/adaptive_sampling_3D`, as a Zarr v3 sub-group holding `coordinates` (N×3, z/y/x) and `colors` (N×3, RGB) arrays.
+
+Note that PLY has no field for axis order, so the `(z, y, x)` coordinates the OME-Zarr writer records explicitly under `axes` land unlabelled in PLY's `x/y/z`. PLY also quantises colors to 8 bits, so a `both` run's two outputs agree on coordinates exactly but differ by up to 1/255 in color.
 
 ### Packages
 

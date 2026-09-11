@@ -40,6 +40,30 @@ def _strip_image_suffix(file_name):
     return os.path.splitext(base)[0]
 
 
+def _output_formats(output_format, is_ome_zarr):
+    """Return the point cloud formats to write for one input image.
+
+    The point cloud itself carries no trace of the container it was read from,
+    so any input format can be written to any output format. ``auto`` keeps the
+    output matched to the input.
+
+    Args:
+        output_format (str): Value of ``--output_format``.
+        is_ome_zarr (bool): Whether the input image is an OME-Zarr group.
+
+    Returns:
+        tuple[str, ...]: Some combination of ``'ply'`` and ``'zarr'``.
+    """
+
+    if output_format == 'auto':
+        return ('zarr',) if is_ome_zarr else ('ply',)
+
+    if output_format == 'both':
+        return ('zarr', 'ply')
+
+    return (output_format,)
+
+
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description = 'Generate a dataset of colored pointclouds by adaptive sampling large 3D images')
@@ -48,12 +72,14 @@ def main():
     parser.add_argument('--multi_thread', type = bool, default = True, help = 'thread processing of volume tiles')
     parser.add_argument('--num_workers', type = int, default = 8, help = 'number of workers for multi threading (default = 8)')
     parser.add_argument('--block_size', type = int, nargs = 3, default = [500, 500, 500], help = 'size of the volume tiles (z, y, x)')
+    parser.add_argument('--output_format', type = str, default = 'auto', choices = ['auto', 'ply', 'zarr', 'both'], help = "point cloud output format ('auto' follows the input: PLY for HDF5, OME-Zarr for OME-Zarr)")
     
     args = parser.parse_args()
     
     input_dir = os.path.abspath(args.input_dir)
     result_dir = os.path.abspath(args.result_dir)
     multi_thread = args.multi_thread
+    output_format = args.output_format
     num_workers = args.num_workers
     block_size = args.block_size
     
@@ -87,13 +113,16 @@ def main():
             # Sequential processing of volume tiles to pcd
             merged_pcd = tiling.process_tiles_sequential(img_path, percentiles, backgrounds, channels, block_size = block_size)
 
-        # Save global point cloud, matching the output format to the input format
-        if is_ome_zarr:
+        # Save global point cloud in the requested format, which defaults to the input format
+        formats = _output_formats(output_format, is_ome_zarr)
+
+        if 'zarr' in formats:
             # Write into an OME-Zarr structure under points/adaptive_sampling_3D
             zarr_root = os.path.join(result_dir, f"{base_name}.ome.zarr")
             logger.info(f"Saving point cloud to OME-Zarr: {zarr_root}/{pointCloudWriter.POINTS_GROUP}/{pointCloudWriter.POINTS_NAME}")
             pointCloudWriter.save_pcd_ome_zarr(merged_pcd, zarr_root)
-        else:
+
+        if 'ply' in formats:
             result_path = os.path.join(result_dir, f"{base_name}.ply")
             logger.info(f"Saving point cloud to: {result_path}")
             pointCloudWriter.save_pcd(merged_pcd, result_path)

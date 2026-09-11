@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OME xmlns="http://www.openmicroscopy.org/Schemas/OME/2016-06"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.openmicroscopy.org/Schemas/OME/2016-06 http://www.openmicroscopy.org/Schemas/OME/2016-06/ome.xsd">
+  <Image ID="Image:0" Name="synthetic">
+    <Pixels ID="Pixels:0"
+            DimensionOrder="XYZCT"
+            Type="uint16"
+            SizeX="160" SizeY="160" SizeZ="120" SizeC="2" SizeT="1"
+            PhysicalSizeX="1.0" PhysicalSizeXUnit="µm"
+            PhysicalSizeY="1.0" PhysicalSizeYUnit="µm"
+            PhysicalSizeZ="1.0" PhysicalSizeZUnit="µm">
+      <Channel ID="Channel:0:0" Name="channel_0" SamplesPerPixel="1"/>
+      <Channel ID="Channel:0:1" Name="channel_1" SamplesPerPixel="1"/>
+      <MetadataOnly/>
+    </Pixels>
+  </Image>
+</OME>
